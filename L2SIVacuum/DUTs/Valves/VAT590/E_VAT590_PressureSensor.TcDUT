@@ -5,8 +5,8 @@
 {attribute 'strict'}
 TYPE E_VAT590_PressureSensor :
 (
-	NOT_DEFINED := 0,
-	MKS500 := 1
+    NOT_DEFINED := 0,
+    MKS500 := 1
 ) USINT := MKS500;
 END_TYPE
 ]]></Declaration>
