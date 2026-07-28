@@ -23,8 +23,7 @@ VAR
     i_xSP_DI  AT %I* : BOOL; // NO contact //function of relay set on the QPC to HV output state
 
     // For logging
-    tPumpStartTimeout : TON := (PT:=T#10S); // Timeout pump start if pressure < 1E-11 for more than 10s.
-    stateTimer:TON;
+    tPumpErrorTimeout : TON := (PT:=T#10S); // Timeout pump start if pressure < 1E-11 for more than 10s.
 
     {attribute 'instance-path'}
     {attribute 'noinit'}
@@ -44,7 +43,11 @@ END_VAR
     <Implementation>
       <ST><![CDATA[(*Pump STATE*)
 IF q_IG.rPRESS <= rMinPressure AND stPump.i_xHV_DI THEN
-    stPump.eState := pumpFAULT;
+    tPumpErrorTimeout(IN:=(q_IG.rPRESS <= rMinPressure AND stPump.i_xHV_DI));
+    IF tPumpErrorTimeout.Q THEN
+        stPump.eState := pumpFAULT;
+        tPumpErrorTimeout(IN:=FALSE);
+    END_IF
 ELSIF q_IG.rPRESS <= rMinPressure AND NOT stPump.i_xHV_DI THEN
     stPump.eState := pumpSTOPPED;
 ELSIF stPump.i_xHV_DI THEN
@@ -75,7 +78,6 @@ IF ePrevState <> stPump.eState THEN
             fbLogger(sMsg:='Pump running.', eSevr:=TcEventSeverity.Info);
       END_CASE
       ePrevState := stPump.eState;
-      stateTimer.IN := TRUE;
   END_IF
 ]]></ST>
       </Implementation>
@@ -97,7 +99,7 @@ END_IF
 q_IG.rPRESS := rPRESS;
 stPump.rPRESS := rPRESS;
 
-IF (stPump.i_xHV_DI) AND (q_IG.rPRESS < q_IG.rVAC_SP) THEN
+IF stPump.eState := pumpRUNNING THEN
     q_IG.xPRESS_OK := TRUE;
 ELSE
     q_IG.xPRESS_OK := FALSE;
