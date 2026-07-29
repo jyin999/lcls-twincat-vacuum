@@ -42,8 +42,9 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*Pump STATE*)
+tPumpErrorTimeout(IN:=(q_IG.rPRESS <= rMinPressure AND stPump.i_xHV_DI));
+
 IF q_IG.rPRESS <= rMinPressure AND stPump.i_xHV_DI THEN
-    tPumpErrorTimeout(IN:=(q_IG.rPRESS <= rMinPressure AND stPump.i_xHV_DI));
     IF tPumpErrorTimeout.Q THEN
         stPump.eState := pumpFAULT;
         tPumpErrorTimeout(IN:=FALSE);
