@@ -53,12 +53,12 @@ VAR_OUTPUT
     field: ONAM MPS OK ;
     '}
     xMPS_OK:	BOOL; (*MPS Fast OK, is set when the Valve is Open*)
-	
+
     {attribute 'pytmc' := '
     pv: OVRD_Countdown
-	field: EGU HOUR;
+    field: EGU HOUR;
     '}
-	tOvrd_countdown : LREAL; (* Countdown of the valve overriding in hour*) 
+    tOvrd_countdown : LREAL; (* Countdown of the valve overriding in hour*)
 END_VAR
 
 VAR_IN_OUT
@@ -284,7 +284,7 @@ Solution: Override only after ten seconds of override, protect against blips,
 Latch override for user defined duration and up to 12 hours. Maximum 12 hours override duration is requested by CDSO.
 *)
 
-OvrdHrFix := LIMIT (0.25,nOvrdDurationHour,12); // change the override hours to between 0.25 hour to 12 hours (Max 12 hours required by Patrick Oppermann) 
+OvrdHrFix := LIMIT (0.25,nOvrdDurationHour,12); // change the override hours to between 0.25 hour to 12 hours (Max 12 hours required by Patrick Oppermann)
 tOvrdDurationMS := DINT_TO_TIME(
                         REAL_TO_DINT (OvrdHrFix*60*60*1000.0)
                    ); //convert to time in msec
@@ -536,42 +536,5 @@ END_VAR
         <ST><![CDATA[iq_stValve.rAT_VAC_HYS := i_fAtVacSPHys;]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_VGC_NEW">
-      <LineId Id="3" Count="161" />
-      <LineId Id="248" Count="0" />
-      <LineId Id="165" Count="82" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.ACT_IO">
-      <LineId Id="2" Count="11" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.ACT_Logger">
-      <LineId Id="2" Count="53" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.ACT_Persistent">
-      <LineId Id="2" Count="16" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.ACT_ResetAlarms">
-      <LineId Id="2" Count="7" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.M_IsClosed">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.M_IsOpen">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.M_Set_OPN_SW">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.M_SetAtVacSP">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_VGC_NEW.M_SetAtVacSPHys">
-      <LineId Id="2" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
