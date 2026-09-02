@@ -121,6 +121,17 @@ VAR
     eVGCPrevState : E_VGC;
 
     rHYS_fix : REAL;
+	
+   //For gauge spike testing, remove before release lib
+   {attribute 'pytmc' := '
+    pv: GaugeSpiked
+    '}
+	bSpiked: BOOL;
+	setSpike: BOOL;
+	resetSpike: BOOL;
+	tof_reset : TOF;
+	sr_SR : SR;
+	
 END_VAR
 
 VAR PERSISTENT
@@ -133,7 +144,7 @@ Modified from A. Wallace's VGC function
 16-10-29
 *)
 (* 10/1/2018 Margaret Ghaly included EPS, PMPS Checkes and MPS trigger signals*)
-(* 6/26/2026 Jing removed the PMPS checks, added a 50 ms delay to filter transient pressure spikes, and modified the override open function to latch for a user-configurable duration of up to 7 days. *)
+(* 6/26/2026 Jing removed the PMPS checks, added a 50 ms delay to filter transient pressure spikes, and modified the override open function to latch for a user-configurable duration of up to 12 hours. *)
 
 
 fbFSInit( CLK := TRUE, Q => xFirstPass);
@@ -180,6 +191,13 @@ iq_stValve.rAT_VAC_HYS := rHYS_fix;
     reset := i_stUSG.rPRESS > iq_stValve.rAT_VAC_HYS OR i_stDSG.rPRESS > iq_stValve.rAT_VAC_HYS OR NOT i_stUSG.xPRESS_OK OR NOT i_stDSG.xPRESS_OK;
     tonReset(IN:=reset, PT:=tReset);
     iq_stValve.xAT_VAC R= tonReset.Q;
+	
+//Record the spikes
+   setSpike := reset;
+   tof_reset(IN:= reset,PT:=T#1S);//latch for 1s for EPICS Archiver
+   resetSpike := tof_reset.Q;   
+   sr_SR(SET1:=setSpike,RESET:=resetSpike);
+   bSpiked :=sr_SR.Q1; 
 
 // Differential pressure check
     (* Calc the differential pressure across the valve *)
@@ -284,7 +302,7 @@ Solution: Override only after ten seconds of override, protect against blips,
 Latch override for user defined duration and up to 12 hours. Maximum 12 hours override duration is requested by CDSO.
 *)
 
-OvrdHrFix := LIMIT (0.25,nOvrdDurationHour,12); // change the override hours to between 0.25 hour to 12 hours (Max 12 hours required by Patrick Oppermann)
+OvrdHrFix := LIMIT (0.25,nOvrdDurationHour,12); // ensure the override hours from user input are within 0.25 hour to 12 hours (Max 12 hours required by Patrick Oppermann)
 tOvrdDurationMS := DINT_TO_TIME(
                         REAL_TO_DINT (OvrdHrFix*60*60*1000.0)
                    ); //convert to time in msec
@@ -536,5 +554,47 @@ END_VAR
         <ST><![CDATA[iq_stValve.rAT_VAC_HYS := i_fAtVacSPHys;]]></ST>
       </Implementation>
     </Method>
+    <LineIds Name="FB_VGC_NEW">
+      <LineId Id="3" Count="51" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="253" Count="1" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="55" Count="193" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.ACT_IO">
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.ACT_Logger">
+      <LineId Id="2" Count="53" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.ACT_Persistent">
+      <LineId Id="2" Count="16" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.ACT_ResetAlarms">
+      <LineId Id="2" Count="7" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.M_IsClosed">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.M_IsOpen">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.M_Set_OPN_SW">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.M_SetAtVacSP">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_VGC_NEW.M_SetAtVacSPHys">
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
